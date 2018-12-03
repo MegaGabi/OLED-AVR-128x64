@@ -4,19 +4,19 @@
 tetris_Game::tetris_Game()
 {
 	GameOver = 0;
+	score = 0;
 	//for(int i = 0; i < FIELD_SIZE; i++)
 	//{
-		//if(i >= 32)
+		//if(i >= 0)
 		//{
 			//if(i%ROW_SIZE)
-				//field_pos[i] = 0xFF;
+				//field_pos[i] = 0x40;
 			//else
-				//field_pos[i] = 0x7F;
+				//field_pos[i] = 0x04;
 		//}
 	//}
 	block = Sprite(BLOCK);
-	Active_block = Block(pos(0, 28), block.sz, Block::I);
-	Active_block.Flip();
+	Active_block = Block(pos(0, BLOCK_SIZE*8), block.sz, Block::I);
 } //tetris_Game
 
 
@@ -82,46 +82,14 @@ void tetris_Game::CheckPosAndDraw()
 
 int tetris_Game::CheckPos()
 {
-	//	FIELD
-	//	o--------------------------------o
-	//	|XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX|
-	//	|XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX|
-	//	o--------------------------------o
-	for(int i = 0; i < FIELD_SIZE; i++)
+	for (int i = 0; i < 4; i++)
 	{
-		int y = (i/ROW_SIZE)*BLOCK_SIZE;
+		int x = (Active_block.b[i].y / BLOCK_SIZE) % 8;
+		int y = (Active_block.b[i].x / BLOCK_SIZE) * ROW_SIZE + (Active_block.b[i].y >= 32);
 
-		//	ROW
-		//	o--------------------------------o
-		//	|	  X  						 |
-		//	|	  X  						 |
-		//	o--------------------------------o
-
-		int r = i%ROW_SIZE;
-
-		//	ROW PART(COLUMNS)
-		//	o--------------------------------o
-		//	|	  X 						 |
-		//	|	     						 |
-		//	o--------------------------------o
-		for(int j = 0; j < 8; j++)
+		if (field_pos[y] & (1<<x) || (Active_block.b[i].y < 0) || (Active_block.b[i].y >= SSD1306_LCDHEIGHT))
 		{
-			if((field_pos[i]>>j) & 1)
-			{
-				int x = BLOCK_SIZE*(j+(r<<3));
-
-				pos toDraw = pos(y, x);
-
-				for(int bl = 0; bl < 4; bl++)
-				{
-					pos ABpos = pos(Active_block.b[bl].x - (Active_block.b[bl].x%BLOCK_SIZE), Active_block.b[bl].y);
-
-					if(ABpos == toDraw)
-					{
-						return 1;
-					}
-				}
-			}
+			return 1;
 		}
 	}
 	return 0;
